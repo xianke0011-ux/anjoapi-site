@@ -4,150 +4,71 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anjo Chat</title>
-
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
-body{
-background:#0f172a;
-font-family:Arial,sans-serif;
-color:white;
-height:100vh;
-display:flex;
-flex-direction:column;
-}
-
-header{
-padding:20px 30px;
-background:#111827;
-font-size:28px;
-font-weight:bold;
-}
-
-.chat-box{
-flex:1;
-padding:30px;
-overflow:auto;
-}
-
-.message{
-max-width:800px;
-margin:20px auto;
-padding:20px;
-border-radius:20px;
-line-height:1.8;
-}
-
-.ai{
-background:#1e293b;
-}
-
-.user{
-background:#2563eb;
-text-align:right;
-}
-
-.input-area{
-display:flex;
-padding:20px;
-background:#111827;
-gap:10px;
-}
-
-input{
-flex:1;
-padding:18px;
-border:none;
-border-radius:14px;
-font-size:18px;
-outline:none;
-}
-
-button{
-padding:18px 30px;
-border:none;
-background:#2563eb;
-color:white;
-font-size:18px;
-border-radius:14px;
-cursor:pointer;
-}
-
-button:hover{
-background:#1d4ed8;
-}
+body{margin:0;background:#0f172a;color:white;font-family:Arial,sans-serif;height:100vh;display:flex;flex-direction:column}
+header{padding:20px 30px;background:#111827;font-size:28px;font-weight:bold}
+.chat-box{flex:1;padding:30px;overflow:auto}
+.message{max-width:800px;margin:20px auto;padding:20px;border-radius:18px;line-height:1.7;white-space:pre-wrap}
+.ai{background:#1e293b}
+.user{background:#2563eb;text-align:right}
+.input-area{display:flex;padding:20px;background:#111827;gap:10px}
+input{flex:1;padding:16px;border:none;border-radius:12px;font-size:17px;outline:none}
+button{padding:16px 28px;border:none;background:#2563eb;color:white;font-size:17px;border-radius:12px;cursor:pointer}
+button:hover{background:#1d4ed8}
 </style>
 </head>
-
 <body>
 
-<header>
-Anjo Chat
-</header>
+<header>Anjo Chat</header>
 
 <div class="chat-box" id="chatBox">
-
-<div class="message ai">
-你好，欢迎使用 Anjo API，请输入你的问题。
-</div>
-
+  <div class="message ai">你好，我是 Anjo Chat。请输入你的问题。</div>
 </div>
 
 <div class="input-area">
-
-<input
-type="text"
-id="userInput"
-placeholder="请输入内容..."
->
-
-<button onclick="sendMessage()">
-发送
-</button>
-
+  <input type="text" id="userInput" placeholder="请输入内容..." onkeydown="if(event.key==='Enter') sendMessage()">
+  <button onclick="sendMessage()">发送</button>
 </div>
 
 <script>
-function sendMessage(){
+async function sendMessage() {
+  const input = document.getElementById("userInput");
+  const chatBox = document.getElementById("chatBox");
+  const text = input.value.trim();
 
-let input =
-document.getElementById("userInput");
+  if (!text) return;
 
-let text =
-input.value.trim();
+  chatBox.innerHTML += `<div class="message user">${text}</div>`;
+  input.value = "";
+  chatBox.scrollTop = chatBox.scrollHeight;
 
-if(text==="") return;
+  chatBox.innerHTML += `<div class="message ai" id="loading">正在思考...</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
 
-let chatBox =
-document.getElementById("chatBox");
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: text })
+    });
 
-chatBox.innerHTML += `
-<div class="message user">
-${text}
-</div>
-`;
+    const data = await res.json();
+    document.getElementById("loading").remove();
 
-setTimeout(()=>{
+    if (data.reply) {
+      chatBox.innerHTML += `<div class="message ai">${data.reply}</div>`;
+    } else {
+      chatBox.innerHTML += `<div class="message ai">出错了：${data.error || "没有返回内容"}</div>`;
+    }
 
-chatBox.innerHTML += `
-<div class="message ai">
-这是演示版聊天页面，后续可以接 OpenAI API。
-</div>
-`;
+  } catch (error) {
+    document.getElementById("loading").remove();
+    chatBox.innerHTML += `<div class="message ai">网络错误，请稍后再试。</div>`;
+  }
 
-chatBox.scrollTop =
-chatBox.scrollHeight;
-
-},500);
-
-input.value="";
-
-chatBox.scrollTop =
-chatBox.scrollHeight;
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 </script>
 
