@@ -1,73 +1,150 @@
+async function getUser(token) {
+  const res = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
+    headers: {
+      apikey: process.env.SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) return null;
+  return res.json();
+}
+
+async function supabaseRest(path, options = {}) {
+  return fetch(`${process.env.SUPABASE_URL}/rest/v1${path}`, {
+    ...options,
+    headers: {
+      apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
+}
+
 export default async function handler(req, res) {
-  // 只允许 POST 请求
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "Only POST requests are allowed",
-    });
-  }
-
   try {
-    const { message } = req.body;
+    const token = req.headers.authorization?.replace("Bearer ", "");
 
-    if (!message) {
-      return res.status(400).json({
-        error: "消息不能为空",
+    if (!token) {
+      return res.status(401).json({
+        error: "请先登录",
       });
     }
 
-    // 调用 OpenAI API
-    const response = await fetch(
+    const user = await getUser(token);
+
+    if (!user?.id) {
+      return res.status(401).json({
+        error: "登录已失效",
+      });
+    }
+
+    // 查询余额
+    let balanceRes = await supabaseRest(
+      `/user_balances?user_id=eq.${user.id}&select=*`
+    );
+
+    let balanceRows = await balanceRes.json();
+
+    // 新用户送0.5美元
+    if (!balanceRows.length) {
+      await supabaseRest(`/user_balances`, {
+        method: "POST",
+        body: JSON.stringify({
+          user_id: user.id,
+          balance_usd: 0.5,
+        }),
+      });
+
+      balanceRows = [{ balance_usd: 0.5 }];
+    }
+
+    const balance = Number(balanceRows[0].balance_usd);
+
+    // 余额不足
+    if (balance <= 0) {
+      return res.status(400).json({
+        error: "余额不足，请充值",
+      });
+    }
+
+    const { message } = req.body;
+
+    // 调 OpenAI
+    const openaiRes = await fetch(
       "https://api.openai.com/v1/chat/completions",
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-5-mini",
+          model: "gpt-4o-mini",
           messages: [
             {
               role: "system",
-              content:
-                "你是 Anjo Chat，一个专业、友好、简洁的 AI 助手。",
+              content: "你是 Anjo Chat 智能助手",
             },
             {
               role: "user",
               content: message,
             },
           ],
-          temperature: 0.7,
-          max_tokens: 800,
         }),
       }
     );
 
-    const data = await response.json();
+    const openaiData = await openaiRes.json();
 
-    // OpenAI 返回错误
-    if (!response.ok) {
-      console.error(data);
-
-      return res.status(500).json({
-        error:
-          data?.error?.message || "OpenAI API 调用失败",
-      });
-    }
-
-    // 获取回复内容
     const reply =
-      data?.choices?.[0]?.message?.content ||
-      "没有获取到回复";
+      openaiData.choices?.[0]?.message?.content ||
+      "暂时无法回复，请稍后重试";
+
+    // 每次聊天扣0.01美元
+    const newBalance = Math.max(balance - 0.01, 0);
+
+    await supabaseRest(
+      `/user_balances?user_id=eq.${user.id}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          balance_usd: newBalance,
+          updated_at: new Date().toISOString(),
+        }),
+      }
+    );
+
+    // 写聊天记录
+    await supabaseRest(`/chat_logs`, {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: user.id,
+        message,
+        reply,
+        cost_usd: 0.01,
+      }),
+    });
+
+    // 写交易记录
+    await supabaseRest(`/transactions`, {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: user.id,
+        type: "chat",
+        amount_usd: -0.01,
+        note: "AI聊天扣费",
+      }),
+    });
 
     return res.status(200).json({
       reply,
+      balance: newBalance,
     });
-  } catch (error) {
-    console.error(error);
-
+  } catch (err) {
     return res.status(500).json({
-      error: "服务器错误，请稍后再试",
+      error: err.message,
     });
   }
 }
