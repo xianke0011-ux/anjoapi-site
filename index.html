@@ -6,54 +6,101 @@
 <title>Anjo API</title>
 
 <style>
-body{
+*{
 margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
 font-family:Arial,sans-serif;
 background:#0f172a;
 color:white;
 text-align:center;
 }
 
-.hero{
-padding:100px 20px;
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 60px;
+background:#111827;
+position:sticky;
+top:0;
 }
 
-h1{
-font-size:60px;
-margin-bottom:10px;
+.logo{
+font-size:28px;
+font-weight:bold;
+}
+
+.nav{
+display:flex;
+gap:30px;
+}
+
+.nav a{
+text-decoration:none;
+color:#cbd5e1;
+}
+
+.hero{
+padding:120px 20px;
+}
+
+.hero h1{
+font-size:72px;
+margin-bottom:20px;
 }
 
 .subtitle{
-font-size:22px;
+font-size:24px;
 color:#cbd5e1;
+margin-bottom:40px;
 }
 
 .button{
 display:inline-block;
-margin-top:30px;
-padding:15px 30px;
+padding:18px 40px;
 background:#2563eb;
-border-radius:12px;
-color:white;
+border-radius:14px;
 text-decoration:none;
-font-size:18px;
+color:white;
+font-size:20px;
+transition:0.3s;
+}
+
+.button:hover{
+background:#1d4ed8;
+transform:translateY(-2px);
 }
 
 .section{
-padding:80px 20px;
 background:#1e293b;
+padding:80px 20px;
 }
 
 .card{
-max-width:800px;
+max-width:900px;
 margin:auto;
-padding:40px;
 background:#334155;
-border-radius:20px;
+padding:50px;
+border-radius:24px;
+}
+
+.card h2{
+font-size:40px;
+margin-bottom:20px;
+}
+
+.card p{
+font-size:20px;
+line-height:1.8;
+color:#e2e8f0;
 }
 
 footer{
-padding:30px;
+padding:40px;
 color:#94a3b8;
 }
 </style>
@@ -61,26 +108,40 @@ color:#94a3b8;
 
 <body>
 
-<div class="hero">
+<header>
+<div class="logo">Anjo API</div>
+
+<div class="nav">
+<a href="#">首页</a>
+<a href="#">价格</a>
+<a href="#">文档</a>
+<a href="#">联系我们</a>
+</div>
+</header>
+
+<section class="hero">
 <h1>Anjo API</h1>
+
 <p class="subtitle">
 稳定的 AI API 中转服务平台
 </p>
 
-<a class="button" href="#">
+<a class="button" href="chat.html">
 开始使用
 </a>
-</div>
+</section>
 
-<div class="section">
+<section class="section">
 <div class="card">
 <h2>支持多个模型</h2>
+
 <p>
 支持 ChatGPT、Claude、Gemini 等 AI 模型 API 接入，
 适用于开发、网站、自动化与企业服务。
+稳定、高速、低延迟，适合个人与企业开发者使用。
 </p>
 </div>
-</div>
+</section>
 
 <footer>
 © 2026 Anjo API
