@@ -10,8 +10,7 @@ h1{text-align:center}
 input,button{width:100%;padding:14px;margin-top:12px;border-radius:10px;border:none;font-size:16px}
 button{background:#2563eb;color:white;cursor:pointer}
 button:hover{background:#1d4ed8}
-.msg{margin-top:15px;color:#cbd5e1;text-align:center}
-a{color:#60a5fa}
+.msg{margin-top:15px;color:#cbd5e1;text-align:center;line-height:1.6}
 </style>
 </head>
 <body>
@@ -19,7 +18,7 @@ a{color:#60a5fa}
 <div class="box">
 <h1>Anjo API</h1>
 
-<input id="email" type="email" placeholder="邮箱">
+<input id="username" type="text" placeholder="用户名">
 <input id="password" type="password" placeholder="密码">
 
 <button onclick="login()">登录</button>
@@ -32,6 +31,10 @@ a{color:#60a5fa}
 
 <script>
 let supabaseClient;
+
+function makeEmail(username){
+  return username.trim().toLowerCase() + "@anjoapi.com";
+}
 
 async function init(){
   const res = await fetch("/api/config");
@@ -50,8 +53,15 @@ async function init(){
 }
 
 async function register(){
-  const email = document.getElementById("email").value;
+  const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
+
+  if(!username || !password){
+    document.getElementById("msg").innerText = "请输入用户名和密码";
+    return;
+  }
+
+  const email = makeEmail(username);
 
   const { error } = await supabaseClient.auth.signUp({
     email,
@@ -59,12 +69,19 @@ async function register(){
   });
 
   document.getElementById("msg").innerText =
-    error ? error.message : "注册成功，请直接登录";
+    error ? error.message : "注册成功，请点击登录";
 }
 
 async function login(){
-  const email = document.getElementById("email").value;
+  const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
+
+  if(!username || !password){
+    document.getElementById("msg").innerText = "请输入用户名和密码";
+    return;
+  }
+
+  const email = makeEmail(username);
 
   const { error } = await supabaseClient.auth.signInWithPassword({
     email,
