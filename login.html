@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Anjo API 登录</title>
+<style>
+body{margin:0;background:#0f172a;color:white;font-family:Arial;display:flex;justify-content:center;align-items:center;height:100vh}
+.box{background:#1e293b;padding:40px;border-radius:20px;width:360px}
+h1{text-align:center}
+input,button{width:100%;padding:14px;margin-top:12px;border-radius:10px;border:none;font-size:16px}
+button{background:#2563eb;color:white;cursor:pointer}
+button:hover{background:#1d4ed8}
+.msg{margin-top:15px;color:#cbd5e1;text-align:center}
+a{color:#60a5fa}
+</style>
+</head>
+<body>
+
+<div class="box">
+<h1>Anjo API</h1>
+
+<input id="email" type="email" placeholder="邮箱">
+<input id="password" type="password" placeholder="密码">
+
+<button onclick="login()">登录</button>
+<button onclick="register()">注册</button>
+
+<div class="msg" id="msg"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+let supabaseClient;
+
+async function init(){
+  const res = await fetch("/api/config");
+  const cfg = await res.json();
+
+  supabaseClient = supabase.createClient(
+    cfg.supabaseUrl,
+    cfg.supabaseAnonKey
+  );
+
+  const { data } = await supabaseClient.auth.getSession();
+
+  if(data.session){
+    window.location.href = "chat.html";
+  }
+}
+
+async function register(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  document.getElementById("msg").innerText =
+    error ? error.message : "注册成功，请直接登录";
+}
+
+async function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    document.getElementById("msg").innerText = error.message;
+  }else{
+    window.location.href = "chat.html";
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
