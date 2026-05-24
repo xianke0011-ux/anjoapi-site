@@ -1,150 +1,146 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Anjo API</title>
 
 <style>
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
 }
 
 body{
-font-family:Arial,sans-serif;
-background:#0f172a;
-color:white;
-text-align:center;
-}
-
-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:20px 60px;
-background:#111827;
-position:sticky;
-top:0;
-}
-
-.logo{
-font-size:28px;
-font-weight:bold;
-}
-
-.nav{
-display:flex;
-gap:30px;
-}
-
-.nav a{
-text-decoration:none;
-color:#cbd5e1;
+  background:#07152e;
+  color:white;
+  font-family:Arial,sans-serif;
 }
 
 .hero{
-padding:120px 20px;
+  min-height:70vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:40px 20px;
 }
 
-.hero h1{
-font-size:72px;
-margin-bottom:20px;
+h1{
+  font-size:72px;
+  margin-bottom:20px;
 }
 
 .subtitle{
-font-size:24px;
-color:#cbd5e1;
-margin-bottom:40px;
+  font-size:28px;
+  color:#d1d5db;
+  margin-bottom:40px;
 }
 
 .button{
-display:inline-block;
-padding:18px 40px;
-background:#2563eb;
-border-radius:14px;
-text-decoration:none;
-color:white;
-font-size:20px;
-transition:0.3s;
+  display:inline-block;
+  background:#2563eb;
+  color:white;
+  text-decoration:none;
+  padding:18px 42px;
+  border-radius:14px;
+  font-size:22px;
+  transition:0.2s;
 }
 
 .button:hover{
-background:#1d4ed8;
-transform:translateY(-2px);
+  background:#1d4ed8;
 }
 
 .section{
-background:#1e293b;
-padding:80px 20px;
+  background:#1e2d47;
+  padding:80px 20px;
+  display:flex;
+  justify-content:center;
 }
 
 .card{
-max-width:900px;
-margin:auto;
-background:#334155;
-padding:50px;
-border-radius:24px;
+  width:100%;
+  max-width:900px;
+  background:#334155;
+  border-radius:24px;
+  padding:50px;
+  text-align:center;
 }
 
 .card h2{
-font-size:40px;
-margin-bottom:20px;
+  font-size:42px;
+  margin-bottom:24px;
 }
 
 .card p{
-font-size:20px;
-line-height:1.8;
-color:#e2e8f0;
+  font-size:22px;
+  color:#e5e7eb;
+  line-height:1.8;
 }
 
-footer{
-padding:40px;
-color:#94a3b8;
+.footer{
+  text-align:center;
+  padding:30px;
+  color:#94a3b8;
+  background:#07152e;
+}
+
+@media(max-width:768px){
+
+  h1{
+    font-size:48px;
+  }
+
+  .subtitle{
+    font-size:20px;
+  }
+
+  .button{
+    font-size:18px;
+    padding:16px 30px;
+  }
+
+  .card h2{
+    font-size:30px;
+  }
+
+  .card p{
+    font-size:18px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<header>
-<div class="logo">Anjo API</div>
-
-<div class="nav">
-<a href="#">首页</a>
-<a href="#">价格</a>
-<a href="#">文档</a>
-<a href="#">联系我们</a>
-</div>
-</header>
-
 <section class="hero">
-<h1>Anjo API</h1>
+  <h1>Anjo API</h1>
 
-<p class="subtitle">
-稳定的 AI API 中转服务平台
-</p>
+  <div class="subtitle">
+    稳定的 AI API 中转与智能聊天平台
+  </div>
 
-<a class="button" href="chat.html">
-开始使用
-</a>
+  <a class="button" href="login.html">
+    开始使用
+  </a>
 </section>
 
 <section class="section">
-<div class="card">
-<h2>支持多个模型</h2>
+  <div class="card">
+    <h2>支持多个模型</h2>
 
-<p>
-支持 ChatGPT、Claude、Gemini 等 AI 模型 API 接入，
-适用于开发、网站、自动化与企业服务。
-稳定、高速、低延迟，适合个人与企业开发者使用。
-</p>
-</div>
+    <p>
+      支持 ChatGPT、Claude、Gemini 等 AI 模型接入，
+      提供稳定、高速、安全的智能聊天体验。
+    </p>
+  </div>
 </section>
 
-<footer>
-© 2026 Anjo API
+<footer class="footer">
+  © 2026 Anjo API
 </footer>
 
 </body>
