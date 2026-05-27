@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anjo Chat</title>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 body{margin:0;background:#0f172a;color:white;font-family:Arial,sans-serif;height:100vh;display:flex;flex-direction:column}
 header{padding:20px 30px;background:#111827;font-size:28px;font-weight:bold}
@@ -20,7 +18,6 @@ button{padding:16px 28px;border:none;background:#2563eb;color:white;font-size:17
 button:hover{background:#1d4ed8}
 </style>
 </head>
-
 <body>
 
 <header>Anjo Chat</header>
@@ -30,87 +27,68 @@ button:hover{background:#1d4ed8}
 </div>
 
 <div class="input-area">
-  <input type="text" id="userInput" placeholder="请输入内容..." onkeydown="if(event.key==='Enter') sendMessage()">
-  <button onclick="sendMessage()">发送</button>
+  <input type="text" id="userInput" placeholder="请输入内容...">
+  <button id="sendBtn">发送</button>
 </div>
 
 <script>
 let supabaseClient = null;
 
 async function init() {
-  try {
-    const res = await fetch("/api/config");
-    const cfg = await res.json();
+  const res = await fetch("/api/config");
+  const cfg = await res.json();
 
-    supabaseClient = window.supabase.createClient(
-      cfg.supabaseUrl,
-      cfg.supabaseAnonKey
-    );
+  supabaseClient = window.supabase.createClient(
+    cfg.supabaseUrl,
+    cfg.supabaseAnonKey
+  );
 
-    const { data } = await supabaseClient.auth.getSession();
+  const { data } = await supabaseClient.auth.getSession();
 
-    if (!data.session) {
-      window.location.href = "login.html";
-    }
-  } catch (e) {
-    alert("初始化失败：" + e.message);
+  if (!data.session) {
+    window.location.href = "login.html";
   }
 }
 
-async function sendMessage() {
+async function doSend() {
   const input = document.getElementById("userInput");
   const chatBox = document.getElementById("chatBox");
   const text = input.value.trim();
 
   if (!text) return;
 
-  if (!supabaseClient) {
-    alert("系统还没初始化完成，请刷新页面");
-    return;
-  }
-
   const { data } = await supabaseClient.auth.getSession();
   const session = data.session;
 
   if (!session) {
-    alert("登录已失效，请重新登录");
     window.location.href = "login.html";
     return;
   }
 
   chatBox.innerHTML += `<div class="message user">${text}</div>`;
   input.value = "";
-
   chatBox.innerHTML += `<div class="message ai" id="loading">正在思考...</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
 
-  try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session.access_token}`
-      },
-      body: JSON.stringify({ message: text })
-    });
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${session.access_token}`
+    },
+    body: JSON.stringify({ message: text })
+  });
 
-    const data = await res.json();
+  const result = await res.json();
+  document.getElementById("loading")?.remove();
 
-    document.getElementById("loading")?.remove();
-
-    if (data.reply) {
-      chatBox.innerHTML += `<div class="message ai">${data.reply}</div>`;
-    } else {
-      chatBox.innerHTML += `<div class="message ai">出错了：${data.error || "没有返回内容"}</div>`;
-    }
-
-  } catch (error) {
-    document.getElementById("loading")?.remove();
-    chatBox.innerHTML += `<div class="message ai">网络错误：${error.message}</div>`;
-  }
-
+  chatBox.innerHTML += `<div class="message ai">${result.reply || "出错了：" + result.error}</div>`;
   chatBox.scrollTop = chatBox.scrollHeight;
 }
+
+document.getElementById("sendBtn").addEventListener("click", doSend);
+document.getElementById("userInput").addEventListener("keydown", function(e){
+  if (e.key === "Enter") doSend();
+});
 
 init();
 </script>
