@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anjo Chat</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 body{margin:0;background:#0f172a;color:white;font-family:Arial,sans-serif;height:100vh;display:flex;flex-direction:column}
 header{padding:20px 30px;background:#111827;font-size:28px;font-weight:bold}
@@ -17,6 +20,7 @@ button{padding:16px 28px;border:none;background:#2563eb;color:white;font-size:17
 button:hover{background:#1d4ed8}
 </style>
 </head>
+
 <body>
 
 <header>Anjo Chat</header>
@@ -31,12 +35,36 @@ button:hover{background:#1d4ed8}
 </div>
 
 <script>
+const SUPABASE_URL = "你的 Supabase Project URL";
+const SUPABASE_ANON_KEY = "你的 Supabase anon public key";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+async function checkLogin() {
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    alert("请先登录");
+    window.location.href = "/login.html";
+  }
+}
+
+checkLogin();
+
 async function sendMessage() {
   const input = document.getElementById("userInput");
   const chatBox = document.getElementById("chatBox");
   const text = input.value.trim();
 
   if (!text) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    alert("请先登录");
+    window.location.href = "/login.html";
+    return;
+  }
 
   chatBox.innerHTML += `<div class="message user">${text}</div>`;
   input.value = "";
@@ -49,7 +77,8 @@ async function sendMessage() {
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`
       },
       body: JSON.stringify({ message: text })
     });
