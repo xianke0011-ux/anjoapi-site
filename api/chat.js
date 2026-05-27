@@ -98,9 +98,9 @@ export default async function handler(req, res) {
 
     const openaiData = await openaiRes.json();
 
-    const reply =
-      openaiData.choices?.[0]?.message?.content ||
-      "暂时无法回复，请稍后重试";
+const reply =
+  openaiData.choices?.[0]?.message?.content ||
+  JSON.stringify(openaiData);
 
     // 每次聊天扣0.01美元
     const newBalance = Math.max(balance - 0.01, 0);
